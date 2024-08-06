@@ -11,7 +11,7 @@ import NewsLetterForm from "../{inc}/newsletterform";
 
 import LinkedinIcon from "../{icons}/linkedin";
 
-import styles from "./Footer.module.scss";
+import styles from "./footer.module.scss";
 
 const Footer = () => {
   const [logo, setLogo] = useState(null);
