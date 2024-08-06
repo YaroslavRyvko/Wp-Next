@@ -46,7 +46,7 @@ const UpcomingMeetingsPage = () => {
 
     const fetchPage = async () => {
       const response = await axios.get(
-         "http://wp-react.bato-webdesign.net/wp-json/wp/v2/pages?slug=upcoming-meetings"
+         "https://wp-react.bato-webdesign.net/wp-json/wp/v2/pages?slug=upcoming-meetings"
       );
       setFields(response.data[0].acf);
     };
