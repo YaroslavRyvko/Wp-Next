@@ -1,0 +1,10 @@
+.articleQuote {
+  margin-bottom: 4rem;
+  font-weight: 600;
+  color: var(--color-black);
+
+  @media screen and (max-width: 1025px) {
+    margin-bottom: 3.2rem;
+    font-size: 1.8rem;
+  }
+}

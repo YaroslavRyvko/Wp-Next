@@ -1,0 +1,117 @@
+.insights {
+  padding: 16rem 0;
+  background-color: var(--color-gray2);
+  overflow: hidden;
+
+  @media screen and (max-width: 1025px) {
+    padding: 7.4rem 0 6.4rem;
+  }
+
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__title {
+    margin-bottom: 1.6rem;
+  }
+
+  &__subtitle {
+    max-width: 50rem;
+    margin: 0 auto 6.4rem;
+    text-align: center;
+    font-weight: 400;
+  }
+
+  &__filter {
+    margin-bottom: 5.6rem;
+
+    @media screen and (max-width: 1025px) {
+      width: 100%;
+      margin-left: auto;
+      margin-bottom: 3.6rem;
+      overflow-x: scroll;
+    }
+
+    form {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      @media screen and (max-width: 768px) {
+        justify-content: flex-start;
+        padding-bottom: 1rem;
+      }
+    }
+
+    &Item {
+      display: flex;
+      flex-shrink: 0;
+      cursor: pointer;
+      border-radius: 5.2rem;
+
+      @media screen and (max-width: 1025px) {
+        border: 1px solid var(--color-gray-light);
+      }
+    }
+
+    .itemFilter {
+      height: 5.2rem;
+      padding: 1.6rem 3.2rem;
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--color-black);
+      border-radius: 5.2rem;
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+
+      @media screen and (max-width: 1025px) {
+        padding: 1.6rem 2.2rem;
+      }
+
+      &Input {
+        margin: 0;
+        width: 0;
+        appearance: none;
+        outline: 0;
+
+        &:checked + .itemFilter {
+          color: #fff;
+          background-color: var(--color-black);
+          border-radius: 5.2rem;
+        }
+      }
+
+      &.active {
+        color: #fff;
+        background-color: var(--color-black);
+      }
+
+      &:hover {
+        color: #fff;
+        background-color: var(--color-black);
+      }
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 8rem 4rem;
+
+    @media screen and (max-width: 1025px) {
+      gap: 4rem;
+    }
+  }
+
+  &__cta {
+    margin-top: 6.4rem;
+
+    &:hover {
+      background-color: #313234;
+      color: white;
+    }
+  }
+}

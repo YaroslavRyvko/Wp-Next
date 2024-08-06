@@ -1,0 +1,9 @@
+export { default as hero } from "./hero";
+export { default as hero2 } from "./hero2";
+export { default as insights } from "./insights";
+export { default as events_slider } from "./events-slider";
+export { default as cards } from "./cards";
+export { default as clients } from "./clients";
+export { default as text_cards } from "./text-cards";
+export { default as team } from "./team";
+export { default as contact } from "./contact";

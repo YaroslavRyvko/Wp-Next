@@ -1,0 +1,40 @@
+.relevantPosts {
+  padding: 17rem 0 15rem;
+  background-color: var(--color-gray2);
+
+  @media screen and (max-width: 1025px) {
+    padding: 6.4rem 0;
+  }
+
+  &__title {
+    margin-bottom: 6.4rem;
+
+    @media screen and (max-width: 1025px) {
+      margin-bottom: 4.8rem;
+    }
+  }
+
+  &__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3rem;
+
+    @media screen and (max-width: 1025px) {
+      gap: 4.3rem;
+    }
+
+    .insights__item.small {
+      max-width: calc(33.3% - 2rem);
+      margin-bottom: 0;
+
+      @media screen and (max-width: 1025px) {
+        max-width: calc(50% - 2.2rem);
+      }
+
+      @media screen and (max-width: 768px) {
+        max-width: 100%;
+      }
+    }
+  }
+}
