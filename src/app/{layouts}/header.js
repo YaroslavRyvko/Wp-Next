@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
 import Link from "next/link";
-
 import axios from "axios";
-
 import styles from "./header.module.scss";
-
 import Linkedin from "../{icons}/linkedin";
 
 const Header = () => {

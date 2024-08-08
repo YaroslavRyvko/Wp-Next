@@ -1,32 +1,25 @@
 import axios from "axios";
-
 import BlockLoader from "../../{inc}/insightsblockloader";
 import RelevantPosts from "../../{partials}/relevant-posts";
-
 import styles from "./page.module.scss";
 
 async function fetchPageData(slug) {
   try {
     const response = await axios.get(
-      `http://wp-react.bato-webdesign.net/wp-json/wp/v2/insights?slug=${slug}`
+      `http://wp-react.bato-webdesign.net/wp-json/wp/v2/insights?slug=${slug}&_embed`
     );
+
     const pageData = response.data[0];
     if (!pageData) {
       return null;
     }
 
-    const categoriesResponse = await axios.get(
-      "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights-category"
-    );
-    const categories = categoriesResponse.data;
-
-    let featuredMedia = null;
-    if (pageData.featured_media) {
-      const mediaResponse = await axios.get(
-        `http://wp-react.bato-webdesign.net/wp-json/wp/v2/media/${pageData.featured_media}`
-      );
-      featuredMedia = mediaResponse.data;
-    }
+    const featuredMedia = pageData._embedded["wp:featuredmedia"]
+      ? pageData._embedded["wp:featuredmedia"][0]
+      : null;
+    const categories = pageData._embedded["wp:term"]
+      ? pageData._embedded["wp:term"][0]
+      : [];
 
     return {
       post: pageData,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
 import InsightItem from "../{partials}/insight-item";
@@ -11,31 +11,35 @@ const InsightsBlock = ({ fields }) => {
   const [insights, setInsights] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
+    try {
       const response = await axios.get(
         "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights-category"
       );
       setCategories(response.data);
-    };
-
-    fetchCategories();
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
   }, []);
 
-  useEffect(() => {
-    const fetchInsights = async () => {
+  const fetchInsights = useCallback(async () => {
+    try {
       let endpoint =
-        "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights?per_page=4&status=publish";
+        "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights?per_page=4&status=publish&_embed";
       if (selectedCategoryId) {
         endpoint += `&insights-category=${selectedCategoryId}`;
       }
-
       const response = await axios.get(endpoint);
       setInsights(response.data);
-    };
-
-    fetchInsights();
+    } catch (error) {
+      console.error("Error fetching insights:", error);
+    }
   }, [selectedCategoryId]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchInsights();
+  }, [fetchCategories, fetchInsights]);
 
   return (
     <section className={styles.insights} id="insights-list">
@@ -85,7 +89,14 @@ const InsightsBlock = ({ fields }) => {
           {insights.length > 0 && (
             <div className={styles.insights__list}>
               {insights.map((insight) => (
-                <InsightItem key={insight.id} insight={insight} />
+                <InsightItem
+                  key={insight.id}
+                  insight={insight}
+                  imageUrl={insight._embedded["wp:featuredmedia"][0].source_url}
+                  categoryNames={insight._embedded["wp:term"][0].map(
+                    (term) => term.name
+                  )}
+                />
               ))}
             </div>
           )}
