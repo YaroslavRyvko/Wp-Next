@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -14,7 +14,7 @@ const UpcomingMeetingsPage = () => {
   const [fields, setFields] = useState({});
 
   const fetchEvents = async (page) => {
-    let endpoint = `https://wp-react.bato-webdesign.net/wp-json/wp/v2/events?per_page=9&page=${page}&status=publish`;
+    let endpoint = `https://wp-react.bato-webdesign.net/wp-json/wp/v2/events?per_page=9&page=${page}&status=publish&_embed`;
     if (selectedCategoryId) {
       endpoint += `&events-category=${selectedCategoryId}`;
     }
@@ -35,31 +35,32 @@ const UpcomingMeetingsPage = () => {
   };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await axios.get(
-        "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/events-category"
-      );
-      setCategories(response.data);
+    const fetchInitialData = async () => {
+      try {
+        const [categoriesResponse, pageResponse] = await Promise.all([
+          axios.get(
+            "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/events-category"
+          ),
+          axios.get(
+            "https://wp-react.bato-webdesign.net/wp-json/wp/v2/pages?slug=upcoming-meetings"
+          ),
+        ]);
+
+        setCategories(categoriesResponse.data);
+        setFields(pageResponse.data[0].acf);
+      } catch (error) {
+        console.error("Failed to fetch initial data:", error);
+      }
     };
 
-    fetchCategories();
-
-    const fetchPage = async () => {
-      const response = await axios.get(
-         "https://wp-react.bato-webdesign.net/wp-json/wp/v2/pages?slug=upcoming-meetings"
-      );
-      setFields(response.data[0].acf);
-    };
-
-    fetchCategories();
-    fetchPage();
+    fetchInitialData();
+    fetchEvents(1);
   }, []);
 
   useEffect(() => {
     setEvents([]);
     setCurrentPage(1);
     setHasMore(true);
-
     fetchEvents(1);
   }, [selectedCategoryId]);
 

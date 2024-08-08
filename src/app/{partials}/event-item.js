@@ -1,44 +1,10 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React from "react";
 import styles from "./event-item.module.scss";
 
 const EventItem = ({ event }) => {
-  const [imageUrl, setImageUrl] = useState("");
-  const [categoryNames, setCategoryNames] = useState([]);
-
-  useEffect(() => {
-    const fetchFeaturedImage = async () => {
-      if (event._links["wp:featuredmedia"]) {
-        try {
-          const response = await axios.get(
-            event._links["wp:featuredmedia"][0].href
-          );
-          setImageUrl(response.data.source_url);
-        } catch (error) {
-          console.error("Error fetching featured image:", error);
-        }
-      }
-    };
-
-    const fetchCategories = async () => {
-      if (event._links["wp:term"]) {
-        const categoriesLink = event._links["wp:term"].find(
-          (link) => link.taxonomy === "events-category"
-        );
-        if (categoriesLink) {
-          try {
-            const response = await axios.get(categoriesLink.href);
-            setCategoryNames(response.data.map((category) => category.name));
-          } catch (error) {
-            console.error("Error fetching categories:", error);
-          }
-        }
-      }
-    };
-
-    fetchFeaturedImage();
-    fetchCategories();
-  }, [event]);
+  const imageUrl = event._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "";
+  const categoryNames =
+    event._embedded?.["wp:term"]?.[0]?.map((term) => term.name) || [];
 
   return (
     <div className={styles.eventItem}>

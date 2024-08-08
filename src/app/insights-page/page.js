@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import InsightItem from "../{partials}/insight-item";
 import styles from "./page.module.scss";
@@ -22,53 +22,38 @@ const InsightsPage = () => {
     return `#${date.toLocaleDateString("en-US", options).replace(/\s+/g, "")}`;
   };
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await axios.get(
-        "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights-category"
-      );
-      setCategories(response.data);
-    };
-    fetchCategories();
-
-    const fetchRecentPost = async () => {
-      const response = await axios.get(
-        "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights?per_page=1&order=desc"
-      );
-      const post = response.data[0];
-      setRecentPostTitle(post.title.rendered);
-      setFeaturedImageDate(formatDate(post.date));
-      setRecentPostCategoryID(post["insights-category"][0]);
-
-      if (post.featured_media) {
-        const mediaResponse = await axios.get(
-          `https://wp-react.bato-webdesign.net/wp-json/wp/v2/media/${post.featured_media}`
-        );
-        setFeaturedImageUrl(mediaResponse.data.source_url);
-      }
-    };
-    fetchRecentPost();
+  const fetchCategories = useCallback(async () => {
+    const response = await axios.get(
+      "https://www.wp-react.bato-webdesign.net/wp-json/wp/v2/insights-category"
+    );
+    setCategories(response.data);
   }, []);
 
-  const getCategoryNameById = (categoryId) => {
-    const category = categories.find((category) => category.id === categoryId);
-    return category ? category.name : null;
-  };
+  const fetchInsights = useCallback(async () => {
+    let endpoint = `https://wp-react.bato-webdesign.net/wp-json/wp/v2/insights?per_page=10&status=publish&page=${currentPage}&_embed`;
+    if (selectedCategoryId) {
+      endpoint += `&insights-category=${selectedCategoryId}`;
+    }
+    const response = await axios.get(endpoint);
+    const total = response.headers["x-wp-totalpages"];
+    setTotalPages(parseInt(total, 10));
+    setInsights(response.data);
+
+    if (!selectedCategoryId && currentPage === 1) {
+      const recentPost = response.data[0];
+      setRecentPostTitle(recentPost.title.rendered);
+      setFeaturedImageDate(formatDate(recentPost.date));
+      setRecentPostCategoryID(recentPost["insights-category"][0]);
+      setFeaturedImageUrl(
+        recentPost._embedded["wp:featuredmedia"][0]?.source_url
+      );
+    }
+  }, [selectedCategoryId, currentPage]);
 
   useEffect(() => {
-    const fetchInsights = async () => {
-      let endpoint = `https://wp-react.bato-webdesign.net/wp-json/wp/v2/insights?per_page=10&status=publish&page=${currentPage}`;
-      if (selectedCategoryId) {
-        endpoint += `&insights-category=${selectedCategoryId}`;
-      }
-      const response = await axios.get(endpoint);
-      setInsights(response.data);
-      const total = response.headers["x-wp-totalpages"];
-      setTotalPages(parseInt(total, 10));
-    };
-
+    fetchCategories();
     fetchInsights();
-  }, [selectedCategoryId, currentPage]);
+  }, [fetchCategories, fetchInsights]);
 
   const handleCategoryChange = (catId) => {
     setSelectedCategoryId(catId);
@@ -79,13 +64,24 @@ const InsightsPage = () => {
     setCurrentPage(page);
   };
 
-  const paginationLinks = () => {
+  const getCategoryNameById = useCallback(
+    (categoryId) => {
+      const category = categories.find(
+        (category) => category.id === categoryId
+      );
+      return category ? category.name : null;
+    },
+    [categories]
+  );
+
+  const paginationLinks = useMemo(() => {
     let links = [];
     const prevPage = currentPage > 1 ? currentPage - 1 : 1;
     const nextPage = currentPage < totalPages ? currentPage + 1 : totalPages;
 
     links.push(
       <a
+        key="prev"
         href="#"
         className={`page-numbers ${currentPage === 1 ? "disabled" : ""}`}
         onClick={(e) => {
@@ -121,13 +117,14 @@ const InsightsPage = () => {
     for (let i = 1; i <= totalPages; i++) {
       if (i === currentPage) {
         links.push(
-          <span aria-current="page" className="page-numbers current">
+          <span key={i} aria-current="page" className="page-numbers current">
             {i}
           </span>
         );
       } else {
         links.push(
           <a
+            key={i}
             className="page-numbers"
             href="#"
             onClick={(e) => {
@@ -143,6 +140,7 @@ const InsightsPage = () => {
 
     links.push(
       <a
+        key="next"
         href="#"
         className={`next page-numbers ${
           currentPage === totalPages ? "disabled" : ""
@@ -178,7 +176,7 @@ const InsightsPage = () => {
     );
 
     return links;
-  };
+  }, [currentPage, totalPages]);
 
   return (
     <>
@@ -191,7 +189,6 @@ const InsightsPage = () => {
             <a href="#" className={styles.insightsPageHero__recent}>
               <div className={styles.insightsPageHero__recentCats}>
                 <span>{featuredImageDate}</span>
-
                 <span key={recentPostCategoryID}>
                   #{getCategoryNameById(recentPostCategoryID)}
                 </span>
@@ -200,7 +197,6 @@ const InsightsPage = () => {
                 <h1
                   className={`${styles.insightsPageHero__recentTitle} title-2`}
                 >
-                  {" "}
                   {recentPostTitle}
                 </h1>
               )}
@@ -243,13 +239,22 @@ const InsightsPage = () => {
             {insights.length > 0 && (
               <div className={styles.insightsPage__list}>
                 {insights.map((insight) => (
-                  <InsightItem key={insight.id} insight={insight} />
+                  <InsightItem
+                    key={insight.id}
+                    insight={insight}
+                    imageUrl={
+                      insight._embedded["wp:featuredmedia"][0].source_url
+                    }
+                    categoryNames={insight._embedded["wp:term"][0].map(
+                      (term) => term.name
+                    )}
+                  />
                 ))}
               </div>
             )}
           </div>
           <div className="pagination">
-            <div className="pagination__list">{paginationLinks()}</div>
+            <div className="pagination__list">{paginationLinks}</div>
           </div>
         </div>
       </section>
